@@ -1,4 +1,4 @@
-package ru.abovousqueadmala;
+package ru.abovousqueadmala.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-
+import ru.abovousqueadmala.dto.ActiveJobInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -35,12 +34,6 @@ public class ElasticJobService {
         this.jobIndexPattern = jobIndexPattern;
     }
 
-    /**
-     * Найти key тех job, у которых последнее событие = ACTIVATED.
-     *
-     * @param jobType тип job, например "demo-task"
-     * @param workerName имя worker, например "demoTaskWorker#handleJob"; можно null
-     */
     public List<Long> findLastActivatedJobKeys(String jobType, String workerName) {
         ElasticSearchResponse response = searchCollapsedLatestJobs(jobType, workerName);
 
@@ -54,20 +47,14 @@ public class ElasticJobService {
                 continue;
             }
 
-            String intent = hit.source.intent;
-            Long key = hit.source.key;
-
-            if ("ACTIVATED".equals(intent) && key != null) {
-                result.add(key);
+            if ("ACTIVATED".equals(hit.source.intent) && hit.source.key != null) {
+                result.add(hit.source.key);
             }
         }
 
         return result;
     }
 
-    /**
-     * Вернуть полную информацию по job, у которых последнее событие = ACTIVATED.
-     */
     public List<ActiveJobInfo> findLastActivatedJobs(String jobType, String workerName) {
         ElasticSearchResponse response = searchCollapsedLatestJobs(jobType, workerName);
 
@@ -81,27 +68,23 @@ public class ElasticJobService {
                 continue;
             }
 
-            Source src = hit.source;
-            if (!"ACTIVATED".equals(src.intent) || src.key == null) {
+            Source source = hit.source;
+            if (!"ACTIVATED".equals(source.intent) || source.key == null) {
                 continue;
             }
 
-            ActiveJobInfo info = new ActiveJobInfo();
-            info.setKey(src.key);
-            info.setIntent(src.intent);
-            info.setTimestamp(src.timestamp);
-            info.setPosition(src.position);
-
-            if (src.value != null) {
-                info.setType(src.value.type);
-                info.setWorker(src.value.worker);
-                info.setTimeout(src.value.timeout);
-                info.setDeadline(src.value.deadline);
-                info.setProcessInstanceKey(src.value.processInstanceKey);
-                info.setElementId(src.value.elementId);
-            }
-
-            result.add(info);
+            result.add(new ActiveJobInfo(
+                    source.key,
+                    source.intent,
+                    source.timestamp,
+                    source.position,
+                    source.value != null ? source.value.type : null,
+                    source.value != null ? source.value.worker : null,
+                    source.value != null ? source.value.timeout : null,
+                    source.value != null ? source.value.deadline : null,
+                    source.value != null ? source.value.processInstanceKey : null,
+                    source.value != null ? source.value.elementId : null
+            ));
         }
 
         return result;
@@ -112,13 +95,8 @@ public class ElasticJobService {
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("size", 1000);
-
-        List<Map<String, Object>> sort = new ArrayList<>();
-        sort.add(Map.of("position", Map.of("order", "desc")));
-        body.put("sort", sort);
-
+        body.put("sort", List.of(Map.of("position", Map.of("order", "desc"))));
         body.put("collapse", Map.of("field", "key"));
-
         body.put("_source", List.of(
                 "key",
                 "intent",
@@ -139,11 +117,7 @@ public class ElasticJobService {
             filters.add(Map.of("term", Map.of("value.worker", workerName)));
         }
 
-        body.put("query", Map.of(
-                "bool", Map.of(
-                        "filter", filters
-                )
-        ));
+        body.put("query", Map.of("bool", Map.of("filter", filters)));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -161,37 +135,37 @@ public class ElasticJobService {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class ElasticSearchResponse {
-        public Hits hits;
+    static final class ElasticSearchResponse {
+        Hits hits;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class Hits {
-        public List<Hit> hits;
+    static final class Hits {
+        List<Hit> hits;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class Hit {
+    static final class Hit {
         @JsonProperty("_source")
-        public Source source;
+        Source source;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class Source {
-        public Long key;
-        public String intent;
-        public String timestamp;
-        public Long position;
-        public ValueInherited value;
+    static final class Source {
+        Long key;
+        String intent;
+        String timestamp;
+        Long position;
+        ValueInherited value;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class ValueInherited {
-        public String type;
-        public String worker;
-        public Long timeout;
-        public Long deadline;
-        public Long processInstanceKey;
-        public String elementId;
+    static final class ValueInherited {
+        String type;
+        String worker;
+        Long timeout;
+        Long deadline;
+        Long processInstanceKey;
+        String elementId;
     }
 }
