@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: camunda-demo
+
+zeebe:
+  client:
+    broker:
+      gateway-address: localhost:26500
+    security:
+      plaintext: true
+
+app:
+  camunda:
+    job-index: zeebe-record_job_8.4.17_2026-04-01
+    zeebe:
+      process-id: demo-process
+  elastic:
+    url: http://localhost:9200

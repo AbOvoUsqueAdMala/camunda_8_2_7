@@ -1,0 +1,106 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+    container_name: elasticsearch
+    environment:
+      discovery.type: single-node
+      cluster.name: camunda-cluster
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      action.destructive_requires_name: "false"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200 >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 20
+
+  zeebe:
+    image: camunda/zeebe:8.4.17
+
+    container_name: zeebe
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ZEEBE_BROKER_CLUSTER_PARTITIONSCOUNT: 1
+      ZEEBE_BROKER_CLUSTER_REPLICATIONFACTOR: 1
+      ZEEBE_BROKER_CLUSTER_CLUSTERSIZE: 1
+      ZEEBE_BROKER_GATEWAY_ENABLE: "true"
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME: io.camunda.zeebe.exporter.ElasticsearchExporter
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL: http://elasticsearch:9200
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE: 1
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_INDEX_PREFIX: zeebe-record
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_CREATE_TEMPLATE: "true"
+    ports:
+      - "26500:26500"
+      - "9600:9600"
+    volumes:
+      - zeebe_data:/usr/local/zeebe/data
+      - zeebe_logs:/usr/local/zeebe/logs
+
+  operate:
+    image: camunda/operate:8.4.17
+
+    container_name: operate
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      zeebe:
+        condition: service_started
+    environment:
+      CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS: zeebe:26500
+      CAMUNDA_OPERATE_ELASTICSEARCH_URL: http://elasticsearch:9200
+      CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL: http://elasticsearch:9200
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8081:8080"
+
+  tasklist:
+    image: camunda/tasklist:8.4.17
+
+    container_name: tasklist
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      zeebe:
+        condition: service_started
+    environment:
+      CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS: zeebe:26500
+      CAMUNDA_TASKLIST_ELASTICSEARCH_URL: http://elasticsearch:9200
+      CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL: http://elasticsearch:9200
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8082:8080"
+
+  connectors:
+    image: camunda/connectors-bundle:0.16.1
+    container_name: connectors
+    depends_on:
+      zeebe:
+        condition: service_started
+    environment:
+      ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS: zeebe:26500
+      ZEEBE_CLIENT_SECURITY_PLAINTEXT: "true"
+    ports:
+      - "8085:8080"
+
+#  app:
+#    build: .
+#    container_name: camunda81-demo-app
+#    depends_on:
+#      zeebe:
+#        condition: service_started
+#    environment:
+#      ZEEBE_GATEWAY_ADDRESS: zeebe:26500
+#      ZEEBE_PLAINTEXT: "true"
+#    ports:
+#      - "8080:8080"
+
+volumes:
+  elasticsearch_data:
+  zeebe_data:
+  zeebe_logs:
