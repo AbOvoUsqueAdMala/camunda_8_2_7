@@ -30,5 +30,5 @@ app:
   elastic:
     url: http://localhost:9200
   stub-service:
-    base-url: http://localhost:${server.port}
+    base-url: http://localhost:8089
     submit-path: /api/stub/external-service

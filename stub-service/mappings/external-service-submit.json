@@ -1,0 +1,18 @@
+{
+  "id": "f0b10ec2-71dc-44b0-b2cb-1dc447494446",
+  "name": "external-service-submit",
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/stub/external-service"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\n  \"requestId\": \"{{jsonPath request.body '$.requestId'}}\",\n  \"status\": \"ACCEPTED\",\n  \"message\": \"Stub service processed request from docker container\",\n  \"trackingId\": \"stub-docker-service\",\n  \"processedAt\": \"2026-04-21T00:00:00Z\"\n}",
+    "transformers": [
+      "response-template"
+    ]
+  }
+}
