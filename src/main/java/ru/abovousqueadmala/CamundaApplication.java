@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@Deployment(resources = {"classpath*:/bpmn/demo-process.bpmn"})
+@Deployment(resources = {"classpath*:/bpmn/**/*.bpmn", "classpath*:/dmn/**/*.dmn"})
 public class CamundaApplication {
 
     public static void main(String[] args) {

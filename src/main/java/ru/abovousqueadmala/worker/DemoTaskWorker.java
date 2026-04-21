@@ -14,7 +14,7 @@ public class DemoTaskWorker {
 
     private static final Logger log = LoggerFactory.getLogger(DemoTaskWorker.class);
 
-    @JobWorker(type = "demo-task", timeout = 10_000_000_000L, autoComplete = false)
+    @JobWorker(type = "demo-task", timeout = 10_000_000_000L, autoComplete = true)
     public Map<String, Object> handleJob(final ActivatedJob job) {
         log.info(
                 "Received job. key={}, processInstanceKey={}, variables={}",
@@ -28,7 +28,7 @@ public class DemoTaskWorker {
         resultVars.put("processedAt", OffsetDateTime.now().toString());
         resultVars.put("approved", true);
 
-        log.info("Job completed. key={}", job.getKey());
+        log.info("Job handled successfully. key={}", job.getKey());
         return resultVars;
     }
 }

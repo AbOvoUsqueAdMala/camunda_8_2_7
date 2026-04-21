@@ -11,19 +11,27 @@ import org.springframework.stereotype.Service;
 public class ProcessService {
 
     private final ZeebeClient zeebeClient;
-    private final String processId;
+    private final String defaultProcessId;
 
     public ProcessService(
             ZeebeClient zeebeClient,
-            @Value("${app.camunda.zeebe.process-id}") String processId
+            @Value("${app.camunda.zeebe.process-id}") String defaultProcessId
     ) {
         this.zeebeClient = zeebeClient;
-        this.processId = processId;
+        this.defaultProcessId = defaultProcessId;
     }
 
     public StartProcessResponse startProcess(Map<String, Object> variables) {
+        return startProcess(null, variables);
+    }
+
+    public StartProcessResponse startProcess(String processId, Map<String, Object> variables) {
+        String resolvedProcessId = processId != null && !processId.isBlank()
+                ? processId
+                : defaultProcessId;
+
         ProcessInstanceEvent event = zeebeClient.newCreateInstanceCommand()
-                .bpmnProcessId(processId)
+                .bpmnProcessId(resolvedProcessId)
                 .latestVersion()
                 .variables(variables)
                 .send()

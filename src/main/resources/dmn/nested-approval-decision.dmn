@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="Definitions_nested_approval"
+             name="nested-approval-decision"
+             namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="nested-approval-decision" name="Nested approval decision">
+    <decisionTable id="DecisionTable_nested_approval" hitPolicy="UNIQUE">
+      <input id="InputClause_amount" label="Amount">
+        <inputExpression id="InputExpression_amount" typeRef="number">
+          <text>amount</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_approved" label="Approved" name="approved" typeRef="boolean" />
+
+      <rule id="Rule_under_or_equal_limit">
+        <inputEntry id="InputEntry_under_or_equal_limit">
+          <text>&lt;= 1000</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_under_or_equal_limit">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+
+      <rule id="Rule_above_limit">
+        <inputEntry id="InputEntry_above_limit">
+          <text>&gt; 1000</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_above_limit">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

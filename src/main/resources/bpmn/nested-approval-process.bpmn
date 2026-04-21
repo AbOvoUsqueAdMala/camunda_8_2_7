@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="Definitions_nested_approval_process"
+                  targetNamespace="http://camunda.org/examples">
+  <bpmn:process id="nested-approval-process" name="Nested Approval Process" isExecutable="true">
+    <bpmn:startEvent id="nested_start_event" name="Nested start">
+      <bpmn:outgoing>flow_nested_start_to_decision</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:businessRuleTask id="evaluate_nested_rules" name="Evaluate nested DMN rules">
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="nested-approval-decision"
+                              resultVariable="approvalDecision"
+                              bindingType="deployment" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow_nested_start_to_decision</bpmn:incoming>
+      <bpmn:outgoing>flow_decision_to_gateway</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+
+    <bpmn:exclusiveGateway id="approval_gateway" name="Approved?" default="flow_gateway_to_rejected_end">
+      <bpmn:incoming>flow_decision_to_gateway</bpmn:incoming>
+      <bpmn:outgoing>flow_gateway_to_service</bpmn:outgoing>
+      <bpmn:outgoing>flow_gateway_to_rejected_end</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="approved_request_service_task" name="Process approved request">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="demo-task" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow_gateway_to_service</bpmn:incoming>
+      <bpmn:outgoing>flow_service_to_completed_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="completed_nested_end" name="Approved path completed">
+      <bpmn:incoming>flow_service_to_completed_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="rejected_nested_end" name="Rejected by DMN">
+      <bpmn:incoming>flow_gateway_to_rejected_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="flow_nested_start_to_decision"
+                       sourceRef="nested_start_event"
+                       targetRef="evaluate_nested_rules" />
+    <bpmn:sequenceFlow id="flow_decision_to_gateway"
+                       sourceRef="evaluate_nested_rules"
+                       targetRef="approval_gateway" />
+    <bpmn:sequenceFlow id="flow_gateway_to_service"
+                       sourceRef="approval_gateway"
+                       targetRef="approved_request_service_task">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= approvalDecision</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_gateway_to_rejected_end"
+                       sourceRef="approval_gateway"
+                       targetRef="rejected_nested_end" />
+    <bpmn:sequenceFlow id="flow_service_to_completed_end"
+                       sourceRef="approved_request_service_task"
+                       targetRef="completed_nested_end" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_nested_approval_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_nested_approval_process" bpmnElement="nested-approval-process">
+      <bpmndi:BPMNShape id="nested_start_event_di" bpmnElement="nested_start_event">
+        <dc:Bounds x="152" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="evaluate_nested_rules_di" bpmnElement="evaluate_nested_rules">
+        <dc:Bounds x="250" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="approval_gateway_di" bpmnElement="approval_gateway" isMarkerVisible="true">
+        <dc:Bounds x="405" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="approved_request_service_task_di" bpmnElement="approved_request_service_task">
+        <dc:Bounds x="510" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="completed_nested_end_di" bpmnElement="completed_nested_end">
+        <dc:Bounds x="665" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="rejected_nested_end_di" bpmnElement="rejected_nested_end">
+        <dc:Bounds x="512" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="flow_nested_start_to_decision_di" bpmnElement="flow_nested_start_to_decision">
+        <di:waypoint x="188" y="200" />
+        <di:waypoint x="250" y="200" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_decision_to_gateway_di" bpmnElement="flow_decision_to_gateway">
+        <di:waypoint x="350" y="200" />
+        <di:waypoint x="405" y="200" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_gateway_to_service_di" bpmnElement="flow_gateway_to_service">
+        <di:waypoint x="455" y="200" />
+        <di:waypoint x="510" y="200" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_gateway_to_rejected_end_di" bpmnElement="flow_gateway_to_rejected_end">
+        <di:waypoint x="430" y="175" />
+        <di:waypoint x="430" y="100" />
+        <di:waypoint x="512" y="100" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_service_to_completed_end_di" bpmnElement="flow_service_to_completed_end">
+        <di:waypoint x="610" y="200" />
+        <di:waypoint x="665" y="200" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,7 +1,6 @@
 package ru.abovousqueadmala.service;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.ZeebeFuture;
 import io.camunda.zeebe.client.api.command.CreateProcessInstanceCommandStep1;
@@ -46,7 +45,7 @@ class ProcessServiceTest {
     }
 
     @Test
-    void startProcessCreatesLatestProcessInstanceWithProvidedVariables() {
+    void startProcessCreatesLatestProcessInstanceWithDefaultProcessId() {
         Map<String, Object> variables = Map.of("customerId", 42, "approved", true);
 
         when(zeebeClient.newCreateInstanceCommand()).thenReturn(createProcessInstanceCommandStep1);
@@ -64,6 +63,30 @@ class ProcessServiceTest {
         StartProcessResponse response = processService.startProcess(variables);
 
         assertThat(response).isEqualTo(new StartProcessResponse(11L, 22L, 3, "demo-process"));
+        verify(createProcessInstanceCommandStep3).variables(variables);
+        verify(zeebeFuture).join();
+    }
+
+    @Test
+    void startProcessUsesExplicitProcessIdWhenProvided() {
+        Map<String, Object> variables = Map.of("amount", 150);
+
+        when(zeebeClient.newCreateInstanceCommand()).thenReturn(createProcessInstanceCommandStep1);
+        when(createProcessInstanceCommandStep1.bpmnProcessId("another-process"))
+                .thenReturn(createProcessInstanceCommandStep2);
+        when(createProcessInstanceCommandStep2.latestVersion()).thenReturn(createProcessInstanceCommandStep3);
+        when(createProcessInstanceCommandStep3.variables(variables)).thenReturn(createProcessInstanceCommandStep3);
+        when(createProcessInstanceCommandStep3.send()).thenReturn(zeebeFuture);
+        when(zeebeFuture.join()).thenReturn(processInstanceEvent);
+        when(processInstanceEvent.getProcessDefinitionKey()).thenReturn(111L);
+        when(processInstanceEvent.getProcessInstanceKey()).thenReturn(222L);
+        when(processInstanceEvent.getVersion()).thenReturn(4);
+        when(processInstanceEvent.getBpmnProcessId()).thenReturn("another-process");
+
+        StartProcessResponse response = processService.startProcess("another-process", variables);
+
+        assertThat(response).isEqualTo(new StartProcessResponse(111L, 222L, 4, "another-process"));
+        verify(createProcessInstanceCommandStep1).bpmnProcessId("another-process");
         verify(createProcessInstanceCommandStep3).variables(variables);
         verify(zeebeFuture).join();
     }

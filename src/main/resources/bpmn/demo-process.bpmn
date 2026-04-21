@@ -1,40 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1" targetNamespace="http://camunda.org/examples" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.13.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="Definitions_demo_process"
+                  targetNamespace="http://camunda.org/examples">
   <bpmn:process id="demo-process" name="Demo Process" isExecutable="true">
-    <bpmn:startEvent id="start_event">
-      <bpmn:outgoing>flow_1</bpmn:outgoing>
+    <bpmn:startEvent id="start_event" name="Start">
+      <bpmn:outgoing>flow_start_to_call_activity</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="service_task_1" name="Process one task">
+
+    <bpmn:callActivity id="call_nested_process" name="Execute nested approval process">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="demo-task" retries="3" />
+        <zeebe:calledElement processId="nested-approval-process"
+                             bindingType="deployment"
+                             propagateAllChildVariables="true" />
       </bpmn:extensionElements>
-      <bpmn:incoming>flow_1</bpmn:incoming>
-      <bpmn:outgoing>flow_2</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:endEvent id="end_event">
-      <bpmn:incoming>flow_2</bpmn:incoming>
+      <bpmn:incoming>flow_start_to_call_activity</bpmn:incoming>
+      <bpmn:outgoing>flow_call_activity_to_end</bpmn:outgoing>
+    </bpmn:callActivity>
+
+    <bpmn:endEvent id="end_event" name="Finish">
+      <bpmn:incoming>flow_call_activity_to_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="flow_1" sourceRef="start_event" targetRef="service_task_1" />
-    <bpmn:sequenceFlow id="flow_2" sourceRef="service_task_1" targetRef="end_event" />
+
+    <bpmn:sequenceFlow id="flow_start_to_call_activity"
+                       sourceRef="start_event"
+                       targetRef="call_nested_process" />
+    <bpmn:sequenceFlow id="flow_call_activity_to_end"
+                       sourceRef="call_nested_process"
+                       targetRef="end_event" />
   </bpmn:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="demo-process">
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_demo_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_demo_process" bpmnElement="demo-process">
       <bpmndi:BPMNShape id="start_event_di" bpmnElement="start_event">
         <dc:Bounds x="152" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="service_task_1_di" bpmnElement="service_task_1">
-        <dc:Bounds x="290" y="80" width="100" height="80" />
+
+      <bpmndi:BPMNShape id="call_nested_process_di" bpmnElement="call_nested_process">
+        <dc:Bounds x="290" y="80" width="120" height="80" />
       </bpmndi:BPMNShape>
+
       <bpmndi:BPMNShape id="end_event_di" bpmnElement="end_event">
-        <dc:Bounds x="462" y="102" width="36" height="36" />
+        <dc:Bounds x="492" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="flow_1_di" bpmnElement="flow_1">
+
+      <bpmndi:BPMNEdge id="flow_start_to_call_activity_di" bpmnElement="flow_start_to_call_activity">
         <di:waypoint x="188" y="120" />
         <di:waypoint x="290" y="120" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="flow_2_di" bpmnElement="flow_2">
-        <di:waypoint x="390" y="120" />
-        <di:waypoint x="462" y="120" />
+
+      <bpmndi:BPMNEdge id="flow_call_activity_to_end_di" bpmnElement="flow_call_activity_to_end">
+        <di:waypoint x="410" y="120" />
+        <di:waypoint x="492" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
