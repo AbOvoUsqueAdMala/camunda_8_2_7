@@ -2,6 +2,7 @@ package ru.abovousqueadmala.service;
 
 import java.util.List;
 import java.util.Map;
+import ru.abovousqueadmala.config.AppProperties;
 import ru.abovousqueadmala.dto.ActiveJobInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +23,13 @@ import static org.mockito.Mockito.when;
 class ElasticJobServiceTest {
 
     @Mock
-    private RestTemplateBuilder restTemplateBuilder;
-
-    @Mock
     private RestTemplate restTemplate;
 
     private ElasticJobService elasticJobService;
 
     @BeforeEach
     void setUp() {
-        when(restTemplateBuilder.build()).thenReturn(restTemplate);
-        elasticJobService = new ElasticJobService(restTemplateBuilder, "http://localhost:9200", "jobs-*");
+        elasticJobService = new ElasticJobService(restTemplate, appProperties());
     }
 
     @Test
@@ -130,5 +126,16 @@ class ElasticJobServiceTest {
         ElasticJobService.Hit hit = new ElasticJobService.Hit();
         hit.source = source;
         return hit;
+    }
+
+    private static AppProperties appProperties() {
+        return new AppProperties(
+                new AppProperties.Camunda(
+                        "jobs-*",
+                        new AppProperties.Zeebe("demo-process")
+                ),
+                new AppProperties.Elastic("http://localhost:9200"),
+                new AppProperties.Docs("Camunda Demo API", "Test docs", "1.0.0")
+        );
     }
 }

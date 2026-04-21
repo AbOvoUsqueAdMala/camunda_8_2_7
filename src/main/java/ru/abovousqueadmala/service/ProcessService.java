@@ -3,29 +3,24 @@ package ru.abovousqueadmala.service;
 import java.util.Map;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
+import ru.abovousqueadmala.config.AppProperties;
 import ru.abovousqueadmala.dto.StartProcessResponse;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ProcessService {
 
     private final ZeebeClient zeebeClient;
-    private final String defaultProcessId;
-
-    public ProcessService(
-            ZeebeClient zeebeClient,
-            @Value("${app.camunda.zeebe.process-id}") String defaultProcessId
-    ) {
-        this.zeebeClient = zeebeClient;
-        this.defaultProcessId = defaultProcessId;
-    }
+    private final AppProperties appProperties;
 
     public StartProcessResponse startProcess(Map<String, Object> variables) {
         return startProcess(null, variables);
     }
 
     public StartProcessResponse startProcess(String processId, Map<String, Object> variables) {
+        String defaultProcessId = appProperties.camunda().zeebe().processId();
         String resolvedProcessId = processId != null && !processId.isBlank()
                 ? processId
                 : defaultProcessId;

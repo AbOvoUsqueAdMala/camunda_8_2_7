@@ -5,6 +5,7 @@ import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.ZeebeFuture;
 import io.camunda.zeebe.client.api.command.CreateProcessInstanceCommandStep1;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
+import ru.abovousqueadmala.config.AppProperties;
 import ru.abovousqueadmala.dto.StartProcessResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class ProcessServiceTest {
 
     @BeforeEach
     void setUp() {
-        processService = new ProcessService(zeebeClient, "demo-process");
+        processService = new ProcessService(zeebeClient, appProperties());
     }
 
     @Test
@@ -89,5 +90,16 @@ class ProcessServiceTest {
         verify(createProcessInstanceCommandStep1).bpmnProcessId("another-process");
         verify(createProcessInstanceCommandStep3).variables(variables);
         verify(zeebeFuture).join();
+    }
+
+    private static AppProperties appProperties() {
+        return new AppProperties(
+                new AppProperties.Camunda(
+                        "jobs-*",
+                        new AppProperties.Zeebe("demo-process")
+                ),
+                new AppProperties.Elastic("http://localhost:9200"),
+                new AppProperties.Docs("Camunda Demo API", "Test docs", "1.0.0")
+        );
     }
 }

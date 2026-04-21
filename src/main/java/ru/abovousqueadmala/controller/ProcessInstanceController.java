@@ -2,6 +2,8 @@ package ru.abovousqueadmala.controller;
 
 import java.util.Collections;
 import java.util.Map;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ru.abovousqueadmala.dto.StartProcessRequest;
 import ru.abovousqueadmala.dto.StartProcessResponse;
 import ru.abovousqueadmala.service.ProcessService;
@@ -13,11 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Process Instances", description = "Operations for starting process instances")
 public class ProcessInstanceController {
 
     private final ProcessService processService;
 
     @PostMapping({"/api/process-instances", "/api/process/start"})
+    @Operation(summary = "Start a new Camunda process instance")
     public ResponseEntity<StartProcessResponse> startNewInstance(
             @RequestBody(required = false) StartProcessRequest request) {
 

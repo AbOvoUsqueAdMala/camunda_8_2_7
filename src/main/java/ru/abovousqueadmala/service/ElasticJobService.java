@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import ru.abovousqueadmala.config.AppProperties;
 import ru.abovousqueadmala.dto.ActiveJobInfo;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,21 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@RequiredArgsConstructor
 public class ElasticJobService {
 
     private final RestTemplate restTemplate;
-    private final String elasticUrl;
-    private final String jobIndexPattern;
-
-    public ElasticJobService(
-            RestTemplateBuilder restTemplateBuilder,
-            @Value("${app.elastic.url}") String elasticUrl,
-            @Value("${app.camunda.job-index}") String jobIndexPattern
-    ) {
-        this.restTemplate = restTemplateBuilder.build();
-        this.elasticUrl = elasticUrl;
-        this.jobIndexPattern = jobIndexPattern;
-    }
+    private final AppProperties appProperties;
 
     public List<Long> findLastActivatedJobKeys(String jobType, String workerName) {
         ElasticSearchResponse response = searchCollapsedLatestJobs(jobType, workerName);
@@ -91,6 +81,8 @@ public class ElasticJobService {
     }
 
     private ElasticSearchResponse searchCollapsedLatestJobs(String jobType, String workerName) {
+        String elasticUrl = appProperties.elastic().url();
+        String jobIndexPattern = appProperties.camunda().jobIndex();
         String url = elasticUrl + "/" + jobIndexPattern + "/_search";
 
         Map<String, Object> body = new LinkedHashMap<>();

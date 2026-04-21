@@ -2,6 +2,8 @@ package ru.abovousqueadmala.controller;
 
 import java.util.Collections;
 import java.util.Map;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ru.abovousqueadmala.dto.ContinueProcessRequest;
 import ru.abovousqueadmala.dto.ContinueProcessResponse;
 import ru.abovousqueadmala.service.ProcessMessageService;
@@ -15,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
+@Tag(name = "Messages", description = "Operations for message correlation")
 public class MessageController {
 
     private final ProcessMessageService processMessageService;
 
     @PostMapping("/external-data")
+    @Operation(summary = "Continue a waiting process instance with external data")
     public ResponseEntity<ContinueProcessResponse> continueProcess(
             @RequestBody ContinueProcessRequest request) {
 
