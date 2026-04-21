@@ -2,7 +2,7 @@ name: camunda_8_2_7
 
 x-elasticsearch-url: &elasticsearch_url http://elasticsearch:9200
 x-zeebe-gateway: &zeebe_gateway zeebe:26500
-x-stub-service-url: &stub_service_url http://stub-service:8080
+x-csharp-service-url: &csharp_service_url http://csharp-service:8080
 x-restart-policy: &restart_policy unless-stopped
 x-spring-profile: &spring_profile dev
 
@@ -98,12 +98,12 @@ services:
     ports:
       - "8085:8080"
 
-  stub-service:
+  csharp-service:
     profiles:
       - app
     build:
       context: ./stub-service
-    container_name: stub-service
+    container_name: csharp-service
     restart: *restart_policy
     ports:
       - "8089:8080"
@@ -120,11 +120,11 @@ services:
         condition: service_healthy
       zeebe:
         condition: service_started
-      stub-service:
+      csharp-service:
         condition: service_started
     environment:
       APP_ELASTIC_URL: *elasticsearch_url
-      APP_STUB_SERVICE_BASE_URL: *stub_service_url
+      APP_STUB_SERVICE_BASE_URL: *csharp_service_url
       APP_STUB_SERVICE_SUBMIT_PATH: /api/stub/external-service
       APP_CAMUNDA_JOB_INDEX: "zeebe-record_job_${CAMUNDA_VERSION:-8.4.17}_*"
       ZEEBE_CLIENT_BROKER_GATEWAYADDRESS: *zeebe_gateway
