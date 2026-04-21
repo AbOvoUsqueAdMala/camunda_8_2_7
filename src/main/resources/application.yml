@@ -29,3 +29,6 @@ app:
       process-id: demo-process
   elastic:
     url: http://localhost:9200
+  stub-service:
+    base-url: http://localhost:${server.port}
+    submit-path: /api/stub/external-service

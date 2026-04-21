@@ -46,11 +46,19 @@
         <zeebe:taskDefinition type="demo-task" retries="3" />
       </bpmn:extensionElements>
       <bpmn:incoming>flow_wait_for_data_to_service</bpmn:incoming>
-      <bpmn:outgoing>flow_service_to_completed_end</bpmn:outgoing>
+      <bpmn:outgoing>flow_service_to_stub_service</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="send_to_stub_service_task" name="Send data to stub service">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="stub-service-task" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow_service_to_stub_service</bpmn:incoming>
+      <bpmn:outgoing>flow_stub_service_to_completed_end</bpmn:outgoing>
     </bpmn:serviceTask>
 
     <bpmn:endEvent id="completed_nested_end" name="Approved path completed">
-      <bpmn:incoming>flow_service_to_completed_end</bpmn:incoming>
+      <bpmn:incoming>flow_stub_service_to_completed_end</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:endEvent id="rejected_nested_end" name="Rejected by DMN">
@@ -74,8 +82,11 @@
     <bpmn:sequenceFlow id="flow_gateway_to_rejected_end"
                        sourceRef="approval_gateway"
                        targetRef="rejected_nested_end" />
-    <bpmn:sequenceFlow id="flow_service_to_completed_end"
+    <bpmn:sequenceFlow id="flow_service_to_stub_service"
                        sourceRef="approved_request_service_task"
+                       targetRef="send_to_stub_service_task" />
+    <bpmn:sequenceFlow id="flow_stub_service_to_completed_end"
+                       sourceRef="send_to_stub_service_task"
                        targetRef="completed_nested_end" />
   </bpmn:process>
 
@@ -101,8 +112,12 @@
         <dc:Bounds x="665" y="160" width="100" height="80" />
       </bpmndi:BPMNShape>
 
+      <bpmndi:BPMNShape id="send_to_stub_service_task_di" bpmnElement="send_to_stub_service_task">
+        <dc:Bounds x="820" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
       <bpmndi:BPMNShape id="completed_nested_end_di" bpmnElement="completed_nested_end">
-        <dc:Bounds x="820" y="182" width="36" height="36" />
+        <dc:Bounds x="975" y="182" width="36" height="36" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="rejected_nested_end_di" bpmnElement="rejected_nested_end">
@@ -135,9 +150,14 @@
         <di:waypoint x="512" y="100" />
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="flow_service_to_completed_end_di" bpmnElement="flow_service_to_completed_end">
+      <bpmndi:BPMNEdge id="flow_service_to_stub_service_di" bpmnElement="flow_service_to_stub_service">
         <di:waypoint x="765" y="200" />
         <di:waypoint x="820" y="200" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_stub_service_to_completed_end_di" bpmnElement="flow_stub_service_to_completed_end">
+        <di:waypoint x="920" y="200" />
+        <di:waypoint x="975" y="200" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

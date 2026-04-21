@@ -5,16 +5,11 @@ import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class DemoTaskWorker {
 
     @JobWorker(type = "demo-task", timeout = 1000)

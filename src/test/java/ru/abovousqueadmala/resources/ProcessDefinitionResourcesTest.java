@@ -5,6 +5,7 @@ import java.io.InputStream;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -38,7 +39,7 @@ class ProcessDefinitionResourcesTest {
         assertThat(document.getElementsByTagNameNS(BPMN_NS, "message").getLength()).isEqualTo(1);
         assertThat(document.getElementsByTagNameNS(BPMN_NS, "businessRuleTask").getLength()).isEqualTo(1);
         assertThat(document.getElementsByTagNameNS(BPMN_NS, "receiveTask").getLength()).isEqualTo(1);
-        assertThat(document.getElementsByTagNameNS(BPMN_NS, "serviceTask").getLength()).isEqualTo(1);
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "serviceTask").getLength()).isEqualTo(2);
 
         Element calledDecision = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "calledDecision").item(0);
         assertThat(calledDecision).isNotNull();
@@ -49,6 +50,11 @@ class ProcessDefinitionResourcesTest {
         Element subscription = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "subscription").item(0);
         assertThat(subscription).isNotNull();
         assertThat(subscription.getAttribute("correlationKey")).isEqualTo("=requestId");
+
+        NodeList taskDefinitions = document.getElementsByTagNameNS(ZEEBE_NS, "taskDefinition");
+        assertThat(taskDefinitions.getLength()).isEqualTo(2);
+        assertThat(((Element) taskDefinitions.item(0)).getAttribute("type")).isEqualTo("demo-task");
+        assertThat(((Element) taskDefinitions.item(1)).getAttribute("type")).isEqualTo("stub-service-task");
     }
 
     @Test

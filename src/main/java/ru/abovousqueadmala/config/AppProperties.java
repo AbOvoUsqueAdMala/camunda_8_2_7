@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AppProperties(
         Camunda camunda,
         Elastic elastic,
-        Docs docs
+        Docs docs,
+        StubService stubService
 ) {
 
     public record Camunda(
@@ -25,6 +26,12 @@ public record AppProperties(
             String title,
             String description,
             String version
+    ) {
+    }
+
+    public record StubService(
+            String baseUrl,
+            String submitPath
     ) {
     }
 }
