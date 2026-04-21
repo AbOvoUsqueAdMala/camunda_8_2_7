@@ -6,7 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AppProperties(
         Camunda camunda,
         Elastic elastic,
-        Docs docs,
         StubService stubService
 ) {
 
@@ -20,13 +19,6 @@ public record AppProperties(
     }
 
     public record Elastic(String url) {
-    }
-
-    public record Docs(
-            String title,
-            String description,
-            String version
-    ) {
     }
 
     public record StubService(

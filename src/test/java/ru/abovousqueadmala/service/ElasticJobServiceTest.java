@@ -135,7 +135,6 @@ class ElasticJobServiceTest {
                         new AppProperties.Zeebe("demo-process")
                 ),
                 new AppProperties.Elastic("http://localhost:9200"),
-                new AppProperties.Docs("Camunda Demo API", "Test docs", "1.0.0"),
                 new AppProperties.StubService("http://localhost:8080", "/api/stub/external-service")
         );
     }

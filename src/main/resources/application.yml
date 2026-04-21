@@ -10,6 +10,10 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+  info:
+    title: Camunda Demo API
+    description: REST API for starting Camunda process instances, correlating messages and managing active jobs.
+    version: 1.0.0
 
 zeebe:
   client:
@@ -19,10 +23,6 @@ zeebe:
       plaintext: true
 
 app:
-  docs:
-    title: Camunda Demo API
-    description: REST API for starting Camunda process instances, correlating messages and managing active jobs.
-    version: 1.0.0
   camunda:
     job-index: zeebe-record_job_8.4.17_2026-04-01
     zeebe:
