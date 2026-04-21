@@ -1,0 +1,14 @@
+@host = http://localhost:8080
+@contentType = application/json
+
+### Continue nested-approval-process after receiveTask subscription is open
+POST {{host}}/api/messages/external-data
+Content-Type: {{contentType}}
+
+{
+  "requestId": "req-123",
+  "variables": {
+    "documentNumber": "DOC-77",
+    "confirmedBy": "user-1"
+  }
+}

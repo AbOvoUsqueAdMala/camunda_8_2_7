@@ -35,7 +35,9 @@ class ProcessDefinitionResourcesTest {
         Document document = parseXml("bpmn/nested-approval-process.bpmn");
 
         assertThat(document.getElementsByTagNameNS(BPMN_NS, "process").getLength()).isEqualTo(1);
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "message").getLength()).isEqualTo(1);
         assertThat(document.getElementsByTagNameNS(BPMN_NS, "businessRuleTask").getLength()).isEqualTo(1);
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "receiveTask").getLength()).isEqualTo(1);
         assertThat(document.getElementsByTagNameNS(BPMN_NS, "serviceTask").getLength()).isEqualTo(1);
 
         Element calledDecision = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "calledDecision").item(0);
@@ -43,6 +45,10 @@ class ProcessDefinitionResourcesTest {
         assertThat(calledDecision.getAttribute("decisionId")).isEqualTo("nested-approval-decision");
         assertThat(calledDecision.getAttribute("resultVariable")).isEqualTo("approvalDecision");
         assertThat(calledDecision.getAttribute("bindingType")).isEqualTo("deployment");
+
+        Element subscription = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "subscription").item(0);
+        assertThat(subscription).isNotNull();
+        assertThat(subscription.getAttribute("correlationKey")).isEqualTo("=requestId");
     }
 
     @Test

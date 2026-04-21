@@ -14,7 +14,7 @@ public class DemoTaskWorker {
 
     private static final Logger log = LoggerFactory.getLogger(DemoTaskWorker.class);
 
-    @JobWorker(type = "demo-task", timeout = 10_000_000_000L, autoComplete = true)
+    @JobWorker(type = "demo-task", timeout = 10_000_000_000L)
     public Map<String, Object> handleJob(final ActivatedJob job) {
         log.info(
                 "Received job. key={}, processInstanceKey={}, variables={}",

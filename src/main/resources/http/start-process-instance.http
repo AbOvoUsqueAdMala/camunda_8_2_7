@@ -8,6 +8,7 @@ Content-Type: {{contentType}}
 {
   "processId": "demo-process",
   "variables": {
+    "requestId": "req-123",
     "amount": 850,
     "customerId": 42
   }
