@@ -20,16 +20,24 @@ public class StubServiceClient {
     private final AppProperties appProperties;
 
     public StubServiceResponse sendApprovalData(StubServiceRequest request) {
-        return postToStubService(request, request.requestId());
+        return postToStubService(
+                request,
+                request.requestId(),
+                appProperties.stubService().submitPath()
+        );
     }
 
     public StubServiceResponse submitAsyncRequest(AsyncStubSubmissionRequest request) {
-        return postToStubService(request, request.requestId());
+        return postToStubService(
+                request,
+                request.requestId(),
+                appProperties.stubService().asyncSubmitPath()
+        );
     }
 
-    private StubServiceResponse postToStubService(Object request, String requestId) {
+    private StubServiceResponse postToStubService(Object request, String requestId, String path) {
         String url = UriComponentsBuilder.fromHttpUrl(appProperties.stubService().baseUrl())
-                .path(appProperties.stubService().submitPath())
+                .path(path)
                 .toUriString();
 
         log.info("Sending payload to stub service. requestId={}, url={}", requestId, url);

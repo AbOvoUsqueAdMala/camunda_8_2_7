@@ -32,3 +32,4 @@ app:
   stub-service:
     base-url: http://localhost:8089
     submit-path: /api/stub/external-service
+    async-submit-path: /api/stub/external-service/async

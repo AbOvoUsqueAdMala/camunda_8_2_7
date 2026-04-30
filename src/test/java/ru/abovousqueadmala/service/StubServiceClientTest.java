@@ -64,7 +64,7 @@ class StubServiceClientTest {
         );
 
         when(restTemplate.postForEntity(
-                eq("http://localhost:8080/api/stub/external-service"),
+                eq("http://localhost:8080/api/stub/external-service/async"),
                 eq(request),
                 eq(StubServiceResponse.class)
         )).thenReturn(ResponseEntity.ok(response));
@@ -96,7 +96,11 @@ class StubServiceClientTest {
                         new AppProperties.Zeebe("demo-process")
                 ),
                 new AppProperties.Elastic("http://localhost:9200"),
-                new AppProperties.StubService("http://localhost:8080", "/api/stub/external-service")
+                new AppProperties.StubService(
+                        "http://localhost:8080",
+                        "/api/stub/external-service",
+                        "/api/stub/external-service/async"
+                )
         );
     }
 }

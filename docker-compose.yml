@@ -126,6 +126,7 @@ services:
       APP_ELASTIC_URL: *elasticsearch_url
       APP_STUB_SERVICE_BASE_URL: *csharp_service_url
       APP_STUB_SERVICE_SUBMIT_PATH: /api/stub/external-service
+      APP_STUB_SERVICE_ASYNC_SUBMIT_PATH: /api/stub/external-service/async
       APP_CAMUNDA_JOB_INDEX: "zeebe-record_job_${CAMUNDA_VERSION:-8.4.17}_*"
       ZEEBE_CLIENT_BROKER_GATEWAYADDRESS: *zeebe_gateway
       ZEEBE_CLIENT_SECURITY_PLAINTEXT: "true"

@@ -1,0 +1,18 @@
+{
+  "id": "7a7e3d82-d077-4cbf-a5ef-2a28902d7af7",
+  "name": "external-service-async-submit",
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/stub/external-service/async"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\n  \"requestId\": \"{{jsonPath request.body '$.requestId'}}\",\n  \"status\": \"ACCEPTED\",\n  \"message\": \"Stub service accepted async request from docker container\",\n  \"trackingId\": \"stub-docker-service-async\",\n  \"processedAt\": \"2026-04-30T00:00:00Z\"\n}",
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

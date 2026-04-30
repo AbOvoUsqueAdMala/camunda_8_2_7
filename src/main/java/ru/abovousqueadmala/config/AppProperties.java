@@ -23,7 +23,8 @@ public record AppProperties(
 
     public record StubService(
             String baseUrl,
-            String submitPath
+            String submitPath,
+            String asyncSubmitPath
     ) {
     }
 }
