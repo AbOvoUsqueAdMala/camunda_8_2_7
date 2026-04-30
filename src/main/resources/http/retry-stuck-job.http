@@ -1,0 +1,4 @@
+@host = http://localhost:8080
+
+### Trigger retry for a stuck active job by shortening its timeout
+POST {{host}}/api/jobs/77/retry

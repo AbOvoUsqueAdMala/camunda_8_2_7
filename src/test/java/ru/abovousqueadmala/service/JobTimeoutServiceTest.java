@@ -59,6 +59,19 @@ class JobTimeoutServiceTest {
     }
 
     @Test
+    void triggerRetryForStuckJobReturnsRetryTriggeredStatus() {
+        when(zeebeClient.newUpdateTimeoutCommand(77L)).thenReturn(updateTimeoutJobCommandStep1);
+        when(updateTimeoutJobCommandStep1.timeout(Duration.ofSeconds(1))).thenReturn(updateTimeoutJobCommandStep2);
+        when(updateTimeoutJobCommandStep2.send()).thenReturn(zeebeFuture);
+        when(zeebeFuture.join()).thenReturn(null);
+
+        JobTimeoutUpdateResponse response = jobTimeoutService.triggerRetryForStuckJob(77L);
+
+        assertThat(response).isEqualTo(new JobTimeoutUpdateResponse(77L, 1000L, "RETRY_TRIGGERED"));
+        verify(zeebeFuture).join();
+    }
+
+    @Test
     void shortenActiveTimeoutsContinuesWhenSingleUpdateFails() {
         when(elasticJobService.findLastActivatedJobKeys("demo-task", "demoTaskWorker#handleJob"))
                 .thenReturn(List.of(10L, 20L, 30L));

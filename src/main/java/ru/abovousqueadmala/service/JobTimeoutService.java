@@ -18,17 +18,26 @@ public class JobTimeoutService {
     static final String DEMO_TASK_WORKER = "demoTaskWorker#handleJob";
     static final Duration SHORT_TIMEOUT = Duration.ofSeconds(1);
     static final String UPDATED_STATUS = "UPDATED";
+    static final String RETRY_TRIGGERED_STATUS = "RETRY_TRIGGERED";
 
     private final ElasticJobService elasticJobService;
     private final ZeebeClient zeebeClient;
 
     public JobTimeoutUpdateResponse setTimeoutToOneSecond(long jobKey) {
+        updateTimeout(jobKey, SHORT_TIMEOUT);
+        return new JobTimeoutUpdateResponse(jobKey, SHORT_TIMEOUT.toMillis(), UPDATED_STATUS);
+    }
+
+    public JobTimeoutUpdateResponse triggerRetryForStuckJob(long jobKey) {
+        updateTimeout(jobKey, SHORT_TIMEOUT);
+        return new JobTimeoutUpdateResponse(jobKey, SHORT_TIMEOUT.toMillis(), RETRY_TRIGGERED_STATUS);
+    }
+
+    private void updateTimeout(long jobKey, Duration timeout) {
         zeebeClient.newUpdateTimeoutCommand(jobKey)
-                .timeout(SHORT_TIMEOUT)
+                .timeout(timeout)
                 .send()
                 .join();
-
-        return new JobTimeoutUpdateResponse(jobKey, SHORT_TIMEOUT.toMillis(), UPDATED_STATUS);
     }
 
     public BulkTimeoutUpdateResponse shortenAllActiveDemoTaskTimeoutsToOneSecond() {

@@ -26,6 +26,12 @@ public class JobController {
         return ResponseEntity.ok(jobTimeoutService.setTimeoutToOneSecond(jobKey));
     }
 
+    @PostMapping("/{jobKey}/retry")
+    @Operation(summary = "Trigger retry for a stuck active job by shortening its timeout")
+    public ResponseEntity<JobTimeoutUpdateResponse> triggerRetry(@PathVariable long jobKey) {
+        return ResponseEntity.ok(jobTimeoutService.triggerRetryForStuckJob(jobKey));
+    }
+
     @PostMapping("/shorten-active-demo-task-timeouts")
     @Operation(summary = "Shorten timeouts for all active demo-task jobs")
     public ResponseEntity<BulkTimeoutUpdateResponse> shortenActiveTimeouts() {

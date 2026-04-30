@@ -37,6 +37,18 @@ class JobControllerTest {
     }
 
     @Test
+    void triggerRetryReturnsRetryTriggeredStatus() throws Exception {
+        given(jobTimeoutService.triggerRetryForStuckJob(77L))
+                .willReturn(new JobTimeoutUpdateResponse(77L, 1000L, "RETRY_TRIGGERED"));
+
+        mockMvc.perform(post("/api/jobs/77/retry"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jobKey").value(77))
+                .andExpect(jsonPath("$.timeoutMs").value(1000))
+                .andExpect(jsonPath("$.status").value("RETRY_TRIGGERED"));
+    }
+
+    @Test
     void shortenActiveTimeoutsReturnsBulkResult() throws Exception {
         given(jobTimeoutService.shortenAllActiveDemoTaskTimeoutsToOneSecond())
                 .willReturn(new BulkTimeoutUpdateResponse(3, 2, List.of(10L, 20L, 30L)));
