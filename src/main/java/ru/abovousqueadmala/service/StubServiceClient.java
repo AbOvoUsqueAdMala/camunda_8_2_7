@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.abovousqueadmala.config.AppProperties;
+import ru.abovousqueadmala.dto.AsyncStubSubmissionRequest;
 import ru.abovousqueadmala.dto.StubServiceRequest;
 import ru.abovousqueadmala.dto.StubServiceResponse;
 
@@ -19,11 +20,19 @@ public class StubServiceClient {
     private final AppProperties appProperties;
 
     public StubServiceResponse sendApprovalData(StubServiceRequest request) {
+        return postToStubService(request, request.requestId());
+    }
+
+    public StubServiceResponse submitAsyncRequest(AsyncStubSubmissionRequest request) {
+        return postToStubService(request, request.requestId());
+    }
+
+    private StubServiceResponse postToStubService(Object request, String requestId) {
         String url = UriComponentsBuilder.fromHttpUrl(appProperties.stubService().baseUrl())
                 .path(appProperties.stubService().submitPath())
                 .toUriString();
 
-        log.info("Sending payload to stub service. requestId={}, url={}", request.requestId(), url);
+        log.info("Sending payload to stub service. requestId={}, url={}", requestId, url);
 
         ResponseEntity<StubServiceResponse> response = restTemplate.postForEntity(
                 url,

@@ -1,0 +1,17 @@
+@host = http://localhost:8080
+@contentType = application/json
+
+### Continue async-stub-callback-process after callback is received
+POST {{host}}/api/async-stub-callbacks/completed
+Content-Type: {{contentType}}
+
+{
+  "requestId": "async-req-123",
+  "status": "COMPLETED",
+  "message": "External processing finished",
+  "trackingId": "stub-docker-service",
+  "variables": {
+    "confirmedBy": "external-system",
+    "callbackResult": "OK"
+  }
+}

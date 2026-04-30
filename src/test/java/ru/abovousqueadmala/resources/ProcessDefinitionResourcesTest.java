@@ -72,6 +72,25 @@ class ProcessDefinitionResourcesTest {
         assertThat(document.getElementsByTagNameNS(DMN_NS, "rule").getLength()).isEqualTo(2);
     }
 
+    @Test
+    void asyncStubCallbackProcessContainsSubmissionTaskAndReceiveTask() throws Exception {
+        Document document = parseXml("bpmn/async-stub-callback-process.bpmn");
+
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "process").getLength()).isEqualTo(1);
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "message").getLength()).isEqualTo(1);
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "receiveTask").getLength()).isEqualTo(1);
+        assertThat(document.getElementsByTagNameNS(BPMN_NS, "serviceTask").getLength()).isEqualTo(1);
+
+        Element subscription = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "subscription").item(0);
+        assertThat(subscription).isNotNull();
+        assertThat(subscription.getAttribute("correlationKey")).isEqualTo("=requestId");
+
+        Element taskDefinition = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "taskDefinition").item(0);
+        assertThat(taskDefinition).isNotNull();
+        assertThat(taskDefinition.getAttribute("type")).isEqualTo("async-stub-submission-task");
+        assertThat(taskDefinition.getAttribute("retries")).isEqualTo("3");
+    }
+
     private Document parseXml(String classpathLocation) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);

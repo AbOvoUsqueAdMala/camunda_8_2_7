@@ -1,0 +1,16 @@
+@host = http://localhost:8080
+@contentType = application/json
+
+### Start async-stub-callback-process instance
+POST {{host}}/api/process-instances
+Content-Type: {{contentType}}
+
+{
+  "processId": "async-stub-callback-process",
+  "variables": {
+    "requestId": "async-req-123",
+    "documentNumber": "DOC-9001",
+    "customerId": 42,
+    "amount": 850
+  }
+}

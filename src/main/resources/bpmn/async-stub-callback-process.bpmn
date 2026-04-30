@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="Definitions_async_stub_callback_process"
+                  targetNamespace="http://camunda.org/examples">
+  <bpmn:message id="message_async_stub_callback_received" name="async-stub-callback-received">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=requestId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+
+  <bpmn:process id="async-stub-callback-process" name="Async Stub Callback Process" isExecutable="true">
+    <bpmn:startEvent id="async_start_event" name="Start async flow">
+      <bpmn:outgoing>flow_start_to_submit_task</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="submit_async_stub_request_task" name="Submit request to stub service">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="async-stub-submission-task" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow_start_to_submit_task</bpmn:incoming>
+      <bpmn:outgoing>flow_submit_task_to_receive_task</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:receiveTask id="wait_for_async_stub_callback"
+                      name="Wait for async stub callback"
+                      messageRef="message_async_stub_callback_received">
+      <bpmn:incoming>flow_submit_task_to_receive_task</bpmn:incoming>
+      <bpmn:outgoing>flow_receive_task_to_end</bpmn:outgoing>
+    </bpmn:receiveTask>
+
+    <bpmn:endEvent id="async_completed_end" name="Callback received">
+      <bpmn:incoming>flow_receive_task_to_end</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="flow_start_to_submit_task"
+                       sourceRef="async_start_event"
+                       targetRef="submit_async_stub_request_task" />
+    <bpmn:sequenceFlow id="flow_submit_task_to_receive_task"
+                       sourceRef="submit_async_stub_request_task"
+                       targetRef="wait_for_async_stub_callback" />
+    <bpmn:sequenceFlow id="flow_receive_task_to_end"
+                       sourceRef="wait_for_async_stub_callback"
+                       targetRef="async_completed_end" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_async_stub_callback_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_async_stub_callback_process" bpmnElement="async-stub-callback-process">
+      <bpmndi:BPMNShape id="async_start_event_di" bpmnElement="async_start_event">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="submit_async_stub_request_task_di" bpmnElement="submit_async_stub_request_task">
+        <dc:Bounds x="270" y="80" width="120" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="wait_for_async_stub_callback_di" bpmnElement="wait_for_async_stub_callback">
+        <dc:Bounds x="470" y="80" width="120" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="async_completed_end_di" bpmnElement="async_completed_end">
+        <dc:Bounds x="672" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="flow_start_to_submit_task_di" bpmnElement="flow_start_to_submit_task">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_submit_task_to_receive_task_di" bpmnElement="flow_submit_task_to_receive_task">
+        <di:waypoint x="390" y="120" />
+        <di:waypoint x="470" y="120" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow_receive_task_to_end_di" bpmnElement="flow_receive_task_to_end">
+        <di:waypoint x="590" y="120" />
+        <di:waypoint x="672" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

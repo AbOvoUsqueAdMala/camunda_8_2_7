@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import ru.abovousqueadmala.config.AppProperties;
+import ru.abovousqueadmala.dto.AsyncStubSubmissionRequest;
 import ru.abovousqueadmala.dto.StubServiceRequest;
 import ru.abovousqueadmala.dto.StubServiceResponse;
 
@@ -47,6 +48,28 @@ class StubServiceClientTest {
         )).thenReturn(ResponseEntity.ok(response));
 
         StubServiceResponse result = stubServiceClient.sendApprovalData(request);
+
+        assertThat(result).isEqualTo(response);
+    }
+
+    @Test
+    void submitAsyncRequestPostsPayloadToConfiguredUrl() {
+        AsyncStubSubmissionRequest request = new AsyncStubSubmissionRequest("async-req-123", "DOC-9001", 42L, 850, 200L);
+        StubServiceResponse response = new StubServiceResponse(
+                "async-req-123",
+                "ACCEPTED",
+                "Stub service accepted request",
+                "stub-1",
+                "2026-04-30T12:00:00Z"
+        );
+
+        when(restTemplate.postForEntity(
+                eq("http://localhost:8080/api/stub/external-service"),
+                eq(request),
+                eq(StubServiceResponse.class)
+        )).thenReturn(ResponseEntity.ok(response));
+
+        StubServiceResponse result = stubServiceClient.submitAsyncRequest(request);
 
         assertThat(result).isEqualTo(response);
     }
