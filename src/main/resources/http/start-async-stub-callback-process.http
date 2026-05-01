@@ -7,10 +7,8 @@ Content-Type: {{contentType}}
 
 {
   "processId": "async-stub-callback-process",
-  "variables": {
-    "requestId": "async-req-123",
-    "documentNumber": "DOC-9001",
-    "customerId": 42,
-    "amount": 850
-  }
+  "requestId": "async-req-123",
+  "documentNumber": "DOC-9001",
+  "customerId": 42,
+  "amount": 850
 }

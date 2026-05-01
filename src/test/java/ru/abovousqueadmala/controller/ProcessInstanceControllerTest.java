@@ -39,10 +39,9 @@ class ProcessInstanceControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "variables": {
-                                    "amount": 42,
-                                    "customerId": 7
-                                  }
+                                  "requestId": "req-123",
+                                  "amount": 42,
+                                  "customerId": 7
                                 }
                                 """))
                 .andExpect(status().isOk())
@@ -57,6 +56,7 @@ class ProcessInstanceControllerTest {
 
         assertThat(processIdCaptor.getValue()).isNull();
         assertThat(variablesCaptor.getValue())
+                .containsEntry("requestId", "req-123")
                 .containsEntry("amount", 42)
                 .containsEntry("customerId", 7);
     }
@@ -71,7 +71,27 @@ class ProcessInstanceControllerTest {
                         .content("""
                                 {
                                   "processId": "demo-process",
+                                  "amount": 250
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bpmnProcessId").value("demo-process"));
+
+        verify(processService).startProcess("demo-process", Map.of("amount", 250));
+    }
+
+    @Test
+    void startProcessStillSupportsLegacyVariablesObject() throws Exception {
+        given(processService.startProcess(org.mockito.ArgumentMatchers.eq("demo-process"), anyMap()))
+                .willReturn(new StartProcessResponse(11L, 22L, 3, "demo-process"));
+
+        mockMvc.perform(post("/api/process-instances")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "processId": "demo-process",
                                   "variables": {
+                                    "requestId": "req-123",
                                     "amount": 250
                                   }
                                 }
@@ -79,7 +99,10 @@ class ProcessInstanceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bpmnProcessId").value("demo-process"));
 
-        verify(processService).startProcess("demo-process", Map.of("amount", 250));
+        verify(processService).startProcess("demo-process", Map.of(
+                "requestId", "req-123",
+                "amount", 250
+        ));
     }
 
     @Test
