@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -81,10 +82,7 @@ class ProcessInstanceControllerTest {
     }
 
     @Test
-    void startProcessStillSupportsLegacyVariablesObject() throws Exception {
-        given(processService.startProcess(org.mockito.ArgumentMatchers.eq("demo-process"), anyMap()))
-                .willReturn(new StartProcessResponse(11L, 22L, 3, "demo-process"));
-
+    void startProcessRejectsLegacyVariablesObject() throws Exception {
         mockMvc.perform(post("/api/process-instances")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -96,13 +94,9 @@ class ProcessInstanceControllerTest {
                                   }
                                 }
                                 """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.bpmnProcessId").value("demo-process"));
+                .andExpect(status().isBadRequest());
 
-        verify(processService).startProcess("demo-process", Map.of(
-                "requestId", "req-123",
-                "amount", 250
-        ));
+        verifyNoInteractions(processService);
     }
 
     @Test

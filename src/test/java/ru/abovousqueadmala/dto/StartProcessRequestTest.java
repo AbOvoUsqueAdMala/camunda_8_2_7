@@ -1,11 +1,13 @@
 package ru.abovousqueadmala.dto;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StartProcessRequestTest {
 
@@ -31,8 +33,8 @@ class StartProcessRequestTest {
     }
 
     @Test
-    void mergesLegacyVariablesObjectWithTopLevelFields() throws Exception {
-        StartProcessRequest request = objectMapper.readValue("""
+    void rejectsLegacyVariablesObject() {
+        assertThatThrownBy(() -> objectMapper.readValue("""
                 {
                   "processId": "demo-process",
                   "variables": {
@@ -41,13 +43,8 @@ class StartProcessRequestTest {
                   },
                   "customerId": 42
                 }
-                """, StartProcessRequest.class);
-
-        assertThat(request.processId()).isEqualTo("demo-process");
-        assertThat(request.variables()).isEqualTo(Map.of(
-                "requestId", "req-legacy",
-                "amount", 100,
-                "customerId", 42
-        ));
+                """, StartProcessRequest.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasRootCauseMessage("Nested 'variables' object is not supported. Pass process variables as top-level JSON fields.");
     }
 }

@@ -9,8 +9,7 @@ import java.util.Map;
 public class StartProcessRequest {
 
     private String processId;
-    private final Map<String, Object> nestedVariables = new LinkedHashMap<>();
-    private final Map<String, Object> topLevelVariables = new LinkedHashMap<>();
+    private final Map<String, Object> variables = new LinkedHashMap<>();
 
     public String processId() {
         return processId;
@@ -22,22 +21,18 @@ public class StartProcessRequest {
     }
 
     public Map<String, Object> variables() {
-        Map<String, Object> mergedVariables = new LinkedHashMap<>(nestedVariables);
-        mergedVariables.putAll(topLevelVariables);
-        return Collections.unmodifiableMap(mergedVariables);
+        return Collections.unmodifiableMap(variables);
     }
 
     @JsonSetter("variables")
-    public void setVariables(Map<String, Object> variables) {
-        nestedVariables.clear();
-
-        if (variables != null) {
-            nestedVariables.putAll(variables);
-        }
+    public void rejectNestedVariables(Object ignored) {
+        throw new IllegalArgumentException(
+                "Nested 'variables' object is not supported. Pass process variables as top-level JSON fields."
+        );
     }
 
     @JsonAnySetter
     public void addTopLevelVariable(String name, Object value) {
-        topLevelVariables.put(name, value);
+        variables.put(name, value);
     }
 }
