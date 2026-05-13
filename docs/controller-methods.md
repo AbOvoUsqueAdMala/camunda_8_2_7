@@ -10,7 +10,9 @@
     - all other top-level JSON fields are passed to the process as variables.
     - nested `"variables"` is not supported.
   - Response: `StartProcessResponse`
-  - Example: [`start-process-instance.http`](../src/main/resources/http/start-process-instance.http#L1)
+  - Examples:
+    - [`start-process-instance.http`](../src/main/resources/http/start-process-instance.http#L1)
+    - [`start-async-stub-callback-process.http`](../src/main/resources/http/start-async-stub-callback-process.http#L1)
 
 ## MessageController
 
@@ -20,6 +22,7 @@
   - Request:
     - `requestId` is used as the correlation key.
     - `variables` contains the payload that will be published to Zeebe.
+    - missing `variables` is treated as an empty payload.
   - Response: `ContinueProcessResponse`
   - Example: [`continue-process-instance.http`](../src/main/resources/http/continue-process-instance.http#L1)
 
@@ -29,8 +32,9 @@
   - Endpoint: `POST /api/async-stub-callbacks/completed`
   - Purpose: accepts callback data from the external async stub flow and resumes the waiting process.
   - Request:
-    - `requestId` is required.
-    - `status`, `message`, `trackingId` and `variables` are forwarded to message correlation.
+    - `requestId` is required and must contain the generated `correlationKey` from `async-stub-submission-task`.
+    - `variables` is copied into the published payload first.
+    - non-blank `status`, `message` and `trackingId` are forwarded as `asyncStubCallbackStatus`, `asyncStubCallbackMessage` and `asyncStubCallbackTrackingId`.
   - Response: `ContinueProcessResponse`
   - Example: [`complete-async-stub-callback-process.http`](../src/main/resources/http/complete-async-stub-callback-process.http#L1)
 

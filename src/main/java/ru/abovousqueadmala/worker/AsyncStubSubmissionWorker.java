@@ -4,6 +4,7 @@ import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.spring.client.annotation.JobWorker;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,10 +22,10 @@ public class AsyncStubSubmissionWorker {
     @JobWorker(type = "async-stub-submission-task")
     public Map<String, Object> handleJob(final ActivatedJob job) {
         Map<String, Object> variables = job.getVariablesAsMap();
-        String requestId = requireString(variables.get("requestId"), "requestId");
+        String correlationKey = createCorrelationKey();
 
         AsyncStubSubmissionRequest request = new AsyncStubSubmissionRequest(
-                requestId,
+                correlationKey,
                 asString(variables.get("documentNumber")),
                 asLong(variables.get("customerId")),
                 asInteger(variables.get("amount")),
@@ -32,15 +33,16 @@ public class AsyncStubSubmissionWorker {
         );
 
         log.info(
-                "Submitting async request to stub service. jobKey={}, processInstanceKey={}, requestId={}",
+                "Submitting async request to stub service. jobKey={}, processInstanceKey={}, correlationKey={}",
                 job.getKey(),
                 job.getProcessInstanceKey(),
-                requestId
+                correlationKey
         );
 
         StubServiceResponse response = stubServiceClient.submitAsyncRequest(request);
 
         Map<String, Object> resultVars = new HashMap<>();
+        resultVars.put("correlationKey", correlationKey);
         resultVars.put("asyncStubSubmissionStatus", response.status());
         resultVars.put("asyncStubSubmissionMessage", response.message());
         resultVars.put("asyncStubTrackingId", response.trackingId());
@@ -55,12 +57,8 @@ public class AsyncStubSubmissionWorker {
         return resultVars;
     }
 
-    private static String requireString(Object value, String fieldName) {
-        String text = asString(value);
-        if (text == null || text.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " is required");
-        }
-        return text;
+    private static String createCorrelationKey() {
+        return "async-stub-" + UUID.randomUUID();
     }
 
     private static String asString(Object value) {

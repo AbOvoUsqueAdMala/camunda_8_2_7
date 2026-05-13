@@ -6,7 +6,7 @@ POST {{host}}/api/async-stub-callbacks/completed
 Content-Type: {{contentType}}
 
 {
-  "requestId": "async-req-123",
+  "requestId": "async-stub-copy-generated-correlation-key",
   "status": "COMPLETED",
   "message": "External processing finished",
   "trackingId": "stub-docker-service",

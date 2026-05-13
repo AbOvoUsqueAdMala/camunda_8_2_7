@@ -8,7 +8,7 @@
                   targetNamespace="http://camunda.org/examples">
   <bpmn:message id="message_async_stub_callback_received" name="async-stub-callback-received">
     <bpmn:extensionElements>
-      <zeebe:subscription correlationKey="=requestId" />
+      <zeebe:subscription correlationKey="=correlationKey" />
     </bpmn:extensionElements>
   </bpmn:message>
 

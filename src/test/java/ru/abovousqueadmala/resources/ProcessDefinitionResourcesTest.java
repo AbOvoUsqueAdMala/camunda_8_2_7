@@ -83,7 +83,7 @@ class ProcessDefinitionResourcesTest {
 
         Element subscription = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "subscription").item(0);
         assertThat(subscription).isNotNull();
-        assertThat(subscription.getAttribute("correlationKey")).isEqualTo("=requestId");
+        assertThat(subscription.getAttribute("correlationKey")).isEqualTo("=correlationKey");
 
         Element taskDefinition = (Element) document.getElementsByTagNameNS(ZEEBE_NS, "taskDefinition").item(0);
         assertThat(taskDefinition).isNotNull();
